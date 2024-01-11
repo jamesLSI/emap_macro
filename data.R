@@ -12,6 +12,34 @@ debt <- read_csv("data_raw/gross-public-sector-debt-as-a-proportion-of-gdp.csv")
 co2 <- read_csv("data_raw/annual-co2-emissions-per-country.csv") %>% 
   rename(Annual_CO2 = `Annual CO₂ emissions`)
 
+energy <- read_csv("data_raw/electricity-prod-source-stacked.csv") %>% 
+  rename_with(~str_remove(., "Electricity from")) %>% 
+  rename_with(~str_remove(., " - TWh")) %>% 
+  rename_with(~str_remove(., "\\(")) %>% 
+  rename_with(~str_remove(., "\\)")) %>% 
+  rename_with(~str_remove(., "adapted for visualization of chart electricity-prod-source-stacked")) %>% 
+  rename_with(~str_squish(.)) %>% 
+  rename_with(~tools::toTitleCase(.)) %>% 
+  rename_with(~str_replace_all(., " ", "_")) %>% 
+  pivot_longer(4:ncol(.)) %>%
+  ### calculate energy mix percentages ###
+  group_by(Entity,
+           Year) %>% 
+  mutate(percent_fuel = value/sum(value,
+                                  na.rm = T),
+         percent_fuel= percent_fuel*100) %>% 
+  ungroup() %>% 
+  select(-value) %>% 
+  pivot_wider(names_from = name,
+              values_from = percent_fuel) %>% 
+  ### combine carbon heavy fuels ###
+  rowwise() %>% 
+  mutate(carbon_heavy = sum(Oil,
+                            Gas,
+                            Coal,
+                            na.rm = T)) %>% 
+  ungroup()
+
 
 ## combine ####
 ### create combined table ####
@@ -28,7 +56,8 @@ group_by(Code) %>%
          percent_change_debt_prop = ((Debt_Percent_GDP - dplyr::lag(Debt_Percent_GDP,1))/dplyr::lag(Debt_Percent_GDP,1))*100,
          percent_change_real_debt = ((Debt_Real - dplyr::lag(Debt_Real,1))/dplyr::lag(Debt_Real,1))*100,
          percent_change_co2 = ((Annual_CO2 - dplyr::lag(Annual_CO2,1))/dplyr::lag(Annual_CO2,1))*100) %>% 
-  ungroup()
+  ungroup() %>% 
+  left_join(energy)
 
 ### get 2012 data for base (first year of danish data) ####
 data_2012 <- gdp_debt_co2 %>% 
@@ -49,3 +78,17 @@ gdp_debt_co2_2012_index <- gdp_debt_co2 %>%
             Debt_Percent_GDP_2012,
             Annual_CO2_2012,
             Debt_Real_2012))
+
+rm(co2,
+   debt,
+   gdp,
+   energy,
+   data_2012,
+   test)
+
+
+
+
+
+
+

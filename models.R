@@ -1,6 +1,6 @@
 source("data.R")
 
-## filter to nordic + ireland for regression ####
+# filter to nordic + ireland for regression ####
 for_model <- gdp_debt_co2_2012_index %>% 
   filter(Code %in% c("FIN",
                      "SWE",
@@ -14,6 +14,15 @@ for_model <- gdp_debt_co2_2012_index %>%
                               0))
 
 ## models ####
+### lm annual c0 to carbon heavy fuel ####
+model_output_co2_carbon_h_fuel <- for_model %>%  
+  # filter(!Code == "IRL") %>% 
+  # filter(Code == "FIN") %$% 
+  filter() %$%
+  lm(Annual_CO2 ~ carbon_heavy)
+
+summary(model_output_co2_carbon_h_fuel)
+
 ### lm annual CO2 to Real Debt (indexed 2012 = 100) ####
 model_output_co2_debt <- for_model %>%  
   # filter(!Code == "IRL") %>% 
