@@ -79,16 +79,36 @@ gdp_debt_co2_2012_index <- gdp_debt_co2 %>%
             Annual_CO2_2012,
             Debt_Real_2012))
 
+### finnish peat prices ####
+
+peat_price_raw <- read_csv("data_raw/001_12gb_2023q3_20240117-164233.csv",
+                           skip = 2) %>% 
+  separate(`Domestic fuel`,
+           into = c("first",
+                    "second"),
+           sep = ",") %>% 
+  mutate(fuel = str_squish(first)) %>% 
+  select(Quarter,
+         fuel,
+         price = `Price (eur/MWh)`,
+         price_change_percent = `Price, year-on-year change (%)`)
+
+peat_price <- peat_price_raw %>% 
+  select(-price_change_percent) %>% 
+  pivot_wider(names_from = fuel,
+              values_from = price)
+
+peat_price_annual_percent_change <- peat_price_raw %>% 
+  select(-price) %>% 
+  pivot_wider(names_from = fuel,
+              values_from = price_change_percent)
+
 rm(co2,
    debt,
    gdp,
    energy,
    data_2012,
-   test)
-
-
-
-
+   peat_price_raw)
 
 
 

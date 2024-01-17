@@ -45,7 +45,7 @@ summary(model_output_percentage_debt_change)
 ## plots ####
 ### Annual Co2 emissions indexed (2012 = 100) ####
 for_model %>% 
-  # filter(Code == "FIN") %>% 
+  # filter(Code == "FIN") %>%
   # mutate(values = as.factor(values)) %>% 
   ggplot(aes(x = Year, y = Annual_CO2_2012_index, color = Code)) +
   geom_point() +
