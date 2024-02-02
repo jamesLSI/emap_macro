@@ -1,5 +1,6 @@
 library(tidyverse)
 library(magrittr)
+source("functions.R")
 
 ## read data, clear variable names ####
 gdp <- read_csv("data_raw/national-gdp-wb.csv") %>% 
@@ -57,7 +58,10 @@ group_by(Code) %>%
          percent_change_real_debt = ((Debt_Real - dplyr::lag(Debt_Real,1))/dplyr::lag(Debt_Real,1))*100,
          percent_change_co2 = ((Annual_CO2 - dplyr::lag(Annual_CO2,1))/dplyr::lag(Annual_CO2,1))*100) %>% 
   ungroup() %>% 
-  left_join(energy)
+  left_join(energy) %>% 
+  group_by(Code) %>% 
+  mutate(percent_change_carbon_heavy = ((carbon_heavy - dplyr::lag(carbon_heavy,1))/dplyr::lag(carbon_heavy,1))*100) %>% 
+  ungroup()
 
 ### get 2012 data for base (first year of danish data) ####
 data_2012 <- gdp_debt_co2 %>% 
@@ -91,7 +95,9 @@ peat_price_raw <- read_csv("data_raw/001_12gb_2023q3_20240117-164233.csv",
   select(Quarter,
          fuel,
          price = `Price (eur/MWh)`,
-         price_change_percent = `Price, year-on-year change (%)`)
+         price_change_percent = `Price, year-on-year change (%)`) %>% 
+  mutate(price = as.numeric(price),
+         price_change_percent = as.numeric(price_change_percent))
 
 peat_price <- peat_price_raw %>% 
   select(-price_change_percent) %>% 

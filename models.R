@@ -23,6 +23,10 @@ model_output_co2_carbon_h_fuel <- for_model %>%
 
 summary(model_output_co2_carbon_h_fuel)
 
+summary_table <- summary(model_output_co2_carbon_h_fuel)
+
+lm_summary_table_function(summary_table)
+
 ### lm annual CO2 to Real Debt (indexed 2012 = 100) ####
 model_output_co2_debt <- for_model %>%  
   # filter(!Code == "IRL") %>% 
@@ -37,10 +41,13 @@ model_output_percentage_debt_change <- for_model %>%
   # filter(!Code == "IRL") %>% 
   # filter(Code == "FIN") %$% 
   filter() %$%
-  lm(percent_change_co2 ~ percent_change_debt_prop + percent_change_gdp + is_finland)
+  lm(percent_change_co2 ~ percent_change_debt_prop + percent_change_gdp + percent_change_carbon_heavy + is_finland)
 
 summary(model_output_percentage_debt_change)
 
+summary_table <- summary(model_output_percentage_debt_change)
+
+lm_summary_table_function(summary_table)
 
 ## plots ####
 ### Annual Co2 emissions indexed (2012 = 100) ####
@@ -58,9 +65,9 @@ for_model %>%
        y = "",
        x = "")
 
-### devt as % of GDP ####
+### debt as % of GDP ####
 for_model %>% 
-  # filter(Code == "FIN") %>% 
+  filter(Code == "FIN") %>%
   # mutate(values = as.factor(values)) %>% 
   ggplot(aes(x = Year, y = Debt_Percent_GDP, color = Code)) +
   geom_point() +
@@ -73,9 +80,10 @@ for_model %>%
        y = "",
        x = "")
 
-### perccentage change debt ####
+### percentage change debt ####
 for_model %>% 
   filter(!Code == "IRL") %>%
+  filter(Code == "FIN") %>%
   # mutate(values = as.factor(values)) %>% 
   ggplot(aes(x = Year, y = percent_change_debt_prop, color = Code)) +
   geom_point() +
@@ -88,4 +96,35 @@ for_model %>%
        y = "",
        x = "")
 
+### percentage high carbon fuels ####
+for_model %>% 
+  filter(Code == "FIN") %>%
+  # mutate(values = as.factor(values)) %>% 
+  ggplot(aes(x = Year, y = carbon_heavy, color = Code)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_brewer(palette = "Accent") +
+  # guides(color = FALSE) +
+  # geom_vline(xintercept = 21, color = "red",
+  #            size = 1, linetype = "dashed") +
+  labs(title = "Carbon Heavy Fuels (% of all fue use)",
+       y = "",
+       x = "")
+
+### percentage change in price of peat ####
+peat_price %>%
+  # filter(Code == "FIN") %>%
+  # mutate(values = as.factor(values)) %>% 
+  ggplot(aes(x = Quarter, y = `Milled peat delivered (excl. excise duty)`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_brewer(palette = "Accent") +
+  # guides(color = FALSE) +
+  # geom_vline(xintercept = 21, color = "red",
+  #            size = 1, linetype = "dashed") +
+  labs(title = "Peat Price including excise duty",
+       y = "",
+       x = "")
+
+#####################
 
