@@ -11,7 +11,12 @@ for_model <- gdp_debt_co2_2012_index %>%
   filter(!is.na(Debt_Real)) %>% 
   mutate(is_finland = if_else(Code == "FIN",
                               1,
-                              0))
+                              0)) %>% 
+  mutate(threshold = if_else(Year > 2018,
+                             1,
+                             0)) %>% 
+  mutate(time = paste0("01-01-",Year),
+         time = dmy(time))
 
 ## models ####
 ### lm annual c0 to carbon heavy fuel ####
@@ -52,7 +57,7 @@ lm_summary_table_function(summary_table)
 ## plots ####
 ### Annual Co2 emissions indexed (2012 = 100) ####
 for_model %>% 
-  # filter(Code == "FIN") %>%
+  filter(!Code == "DNK") %>%
   # mutate(values = as.factor(values)) %>% 
   ggplot(aes(x = Year, y = Annual_CO2_2012_index, color = Code)) +
   geom_point() +
