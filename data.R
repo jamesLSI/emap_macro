@@ -116,5 +116,6 @@ rm(co2,
    data_2012,
    peat_price_raw)
 
-
+peat_tax_consumption <- readxl::read_excel("data_raw/peat_tax.xlsx",
+                                             .name_repair = namesFunction)
 

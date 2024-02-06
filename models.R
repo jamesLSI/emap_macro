@@ -131,5 +131,27 @@ peat_price %>%
        y = "",
        x = "")
 
-#####################
+### peat tax consumption ####
 
+model_output_peat <- peat_tax_consumption %$%  
+  lm(PeatConsumption ~ TaxRate)
+
+summary(model_output_peat)
+
+summary_table <- summary(model_output_peat)
+
+lm_summary_table_function(summary_table)
+
+peat_tax_consumption %>% 
+  # filter(!Code == "DNK") %>%
+  # mutate(values = as.factor(values)) %>% 
+  ggplot(aes(x = TaxRate, y = PeatConsumption)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_brewer(palette = "Accent") +
+  # guides(color = FALSE) +
+  # geom_vline(xintercept = 21, color = "red",
+  #            size = 1, linetype = "dashed") +
+  labs(title = "Peat Consumption and Tax Rate",
+       y = "",
+       x = "")
