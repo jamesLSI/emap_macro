@@ -87,3 +87,30 @@ plot <- for_model_no_covid %>%
 
 
 plotly::ggplotly(plot)
+
+
+##############
+
+rdd_lcfm <- for_model %>%  
+  # filter(!Code == "IRL") %>% 
+  filter(Code == "FIN") %$%
+  # filter() %$%
+  lm(carbon_heavy_2012 ~ threshold + I(time - dmy("01-01-2019")) + threshold:I(time - dmy("01-01-2019")))
+
+summary(rdd_lcfm)     
+
+for_model %>%  
+  # filter(!Code == "IRL") %>% 
+  filter(Code == "FIN") %>%
+  mutate(threshold = as.factor(threshold)) %>% 
+  ggplot(aes(x = time, y = carbon_heavy, color = threshold)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_brewer(palette = "Accent") +
+  guides(color = FALSE) +
+  geom_vline(xintercept = 21, color = "red",
+             size = 1, linetype = "dashed") +
+  labs(title = "Carbon Heavy Fuel Share",
+       subtitle = "RDD from 2019 policy launch",
+       y = "",
+       x = "")
